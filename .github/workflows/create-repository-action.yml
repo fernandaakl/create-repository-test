@@ -1,0 +1,67 @@
+name: Create Repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'name of new repository'
+        required: true
+      org:
+        description: 'name of an organization'
+        required: true
+      description:
+        description: 'description of new repository'
+        required: false
+      private:
+        description: 'private'
+        type: boolean
+        required: false
+        default: true
+      visibility:
+        description: 'visibility of new repository'
+        type: choice
+        options:
+        - private
+        - public
+        required: false
+        default: 'true'
+      
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Repository
+      id: create_repo
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      run: |
+        response=$(curl -s -o response.json -w "%{http_code}" -X POST -H "Authorization: token $GITHUB_TOKEN" \
+        -d '{"name":"${{ github.event.inputs.name }}", "description":"This is your first repo!", "homepage":"https://github.com/${{ github.event.inputs.org }}", "private":${{ github.event.inputs.private }}}' \
+        https://api.github.com/user/repos)
+
+        echo "response_code=$response" >> $GITHUB_OUTPUT
+        
+    - name: Check repository creation response
+      if: steps.create_repo.outputs.response_code != '201'
+      run: |
+        echo "Failed to create repository. HTTP response code: ${{ steps.create_repo.outputs.response_code }}"
+        exit 1
+      
+    #- name: Create Repository
+      #uses: f1lander/create-repository-action@v1.0.2
+      #with:
+        #name: ${{ github.event.inputs.name }}
+        #org: ${{ github.event.inputs.org }}
+        #private: ${{ github.event.inputs.visibility }}
+        #access-token: ${{ secrets.TOKEN }}
+        
+    #- name: Create GitHub Repo
+      #uses: howlowck/create-repo-action@v1.0
+      #with:
+        #repoOrg: ${{ github.event.inputs.org }}
+        #repoName: ${{ github.event.inputs.name }}
+        #repoDescription: ${{ github.event.inputs.description }}
+        #repoVisibility: ${{ github.event.inputs.visibility }}
+        #securityToken: ${{ secrets.TOKEN }}
+        # Environment variables to secrets
+        #envsToRepoSecrets: # optional, default i

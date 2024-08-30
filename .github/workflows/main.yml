@@ -1,0 +1,28 @@
+name: Create Repository using JS
+
+on:
+  workflow_dispatch: # Manually trigger the workflow
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # Specify the Node.js version you are using
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./.github/actions/create-repo
+
+      - name: Create a new GitHub repository
+        uses: ./.github/actions/create-repo
+        with:
+          repo-name: 'new-repo-name'
+          repo-description: 'This is a new repository created by a GitHub Action'
+          github-token: ${{ secrets.TOKEN }}
