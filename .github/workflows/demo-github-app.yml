@@ -1,0 +1,19 @@
+name: Demo Github App
+
+on:
+  workflow_dispatch:
+    inputs:
+      example_input:
+        description: 'An example input'
+        required: true
+        default: 'default value'
+
+jobs:
+  example_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Print input
+        run: echo "The input value is ${{ github.event.inputs.example_input }}"
